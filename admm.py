@@ -7,7 +7,7 @@
 
 """TODO
 Add Rooms
-	** fix the way rooms are added >_<
+	** was using the wrong X and y...
 
 Add bombs to fix wall issue...
 Implement health
@@ -20,6 +20,7 @@ Add items
 	*https://docs.python.org/2/library/curses.html#textbox-objects
 Add ending condition
 
+Add Loading screen
 
 """
 
@@ -38,7 +39,7 @@ sys.setrecursionlimit(100000)
 class mm():
 
 	def __init__(self, debug=True):
-		
+		self.debug = debug
 		maze = {}
 		# self.maxY = y-1
 		# self.maxX = x-1
@@ -70,10 +71,10 @@ class mm():
 
 		curses.start_color()
 
-		self.items= { 	'heart':{'icon':u"\U0001f493",'position':1},
-						'money':{'icon':u"\U0001f4b0",'position':2},
-						'food':{'icon':u"\U0001f371",'position':3},
-						'bomb':{'icon':u"\U0001F4a3",'position':4}
+		self.items= { 	'health':{'icon':u"\U0001f493",'position':1,'max':100,'current':100},
+						'money':{'icon':u"\U0001f4b0",'position':4,'max':100000,'current':0},
+						'food':{'icon':u"\U0001f371",'position':7,'max':10,'current':0},
+						'bomb':{'icon':u"\U0001F4a3",'position':10,'max':10,'current':3}
 				 	}
 
 
@@ -135,6 +136,7 @@ class mm():
 
 		charPos = [self.lastY,self.lastX]
 
+		
 		self.__make_room__(self.startY,self.startX,3)
 		self.__make_room__(charPos[0],charPos[1],3)
 
@@ -153,13 +155,22 @@ class mm():
 					if self.maze[cols][rows]['wall'] :
 						stdscr.addstr(cols,rows,"#",curses.A_DIM)
 			stdscr.addstr(charPos[0],charPos[1]-1,player.encode("utf-8"))
-			# display item
+			# display side items
 			for item in self.items:
 				posY = self.minY + self.items[item]['position'] + 1
-				posX = self.maxX + 3  #guh magic number
-				icon = self.items[item]['icon']
-				name = icon + " " + item
+				posX = self.maxX + 1  #guh magic number
+				# icon = self.items[item]['icon']
+				# values += " " 
+				values = str(self.items[item]['current'])
+				values += "/"
+				values += str(self.items[item]['max'])
+
+				name =  item
+				name += " "
+				name += self.items[item]['icon']
+
 				stdscr.addstr(posY,posX,name.encode("utf-8"))
+				stdscr.addstr(posY+1,posX,values.encode("utf-8"))
 
 
 			stdscr.addstr(self.startY,self.startX,self.exit.encode("utf-8"))
@@ -344,8 +355,8 @@ class mm():
 			# 	for rx in self.roomX:
 			# 		self.__make_room__(ry,rx,self.maxRoomSize)
 			# NEW random room code...
-			msg = "length of roomY %d, length of roomX %d)" %(len(self.roomY),len(self.roomX))
-			self.__logger__(msg,"355")
+			# msg = "length of roomY %d, length of roomX %d)" %(len(self.roomY),len(self.roomX))
+			# self.__logger__(msg,"355")
 			rm = random.choice(range(10,42))
 			while rm > 0 and self.roomY and self.roomX:
 				rmy = self.roomY.pop()
@@ -380,13 +391,16 @@ class mm():
 		# self.log.write("what?!\n\n")
 		# json.dump(neighbors,self.log)
 		msg = "calling make_room with y=%d,x=%d,size=%d" %(y,x,size)
-		# self.__logger__(msg,getframeinfo(currentframe()).lineno)
+		if self.debug:
+			self.__logger__(msg,getframeinfo(currentframe()).lineno)
 		
 		if size < 1:
-			size = random.choice(range(2,self.maxRoomSize+2))
-
+			size = random.choice(range(1,self.maxRoomSize))
+		if self.debug:
+			msg = "making a room with\n Y: %d - %d \n \nx: %d - %d" %(y-size, y+size+1,x-size,x+size+1)
+			self.__logger__(msg,getframeinfo(currentframe()).lineno)
 		for cols in range(y-size,y+size):
-			for rows in range(x-size,y+size):
+			for rows in range(x-size,x+size):
 				try:
 					if self.__in_range__(cols,rows):
 						if not self.maze[cols][rows]['visited']:
