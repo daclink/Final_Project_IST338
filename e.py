@@ -4,14 +4,53 @@
 import json
 import random
 
-items= { 	'heart':{'icon':u"\U0001f493",'position':1},
-						'money':{'icon':u"\U0001f4b0",'position':2},
-						'food':{'icon':u"\U0001f371",'position':3},
-						'bomb':{'icon':u"\U0001F4a3",'position':4}
-				 	}
+sbomb = {}
 
-for item in items:
-	print items[item]
+def __det_bomb(bomb):
+	for col in range(bomb['y']-1,bomb['y']+2):
+		for row in range(bomb['x']-1,bomb['x']+2):
+			print "col %d row %d BOOM\n" %(col,row)
+
+for b in range(4):
+	sbomb[len(sbomb)+1] = {
+							'counter':3
+							,'y':random.choice(range(12))
+							,'x':random.choice(range(12))
+						}
+print sbomb
+
+
+while sbomb[2]['counter'] > 0:
+	print sbomb[2]['counter']
+	sbomb[2]['counter'] -=1
+
+__det_bomb(sbomb[2])
+
+for b in sbomb:
+	print "sbomb[%d]['counter'] == %d " %(b,sbomb[b]['counter'])
+
+remB = {}
+for b in sbomb:
+	if sbomb[b]['counter'] <= 0:
+		remB += [b]
+
+print "remB\n\n"		
+print remB
+print "remB\n\n"		
+
+for x in remB:
+	del sbomb[x]
+
+print sbomb
+
+# items= { 	'heart':{'icon':u"\U0001f493",'position':1},
+# 						'money':{'icon':u"\U0001f4b0",'position':2},
+# 						'food':{'icon':u"\U0001f371",'position':3},
+# 						'bomb':{'icon':u"\U0001F4a3",'position':4}
+# 				 	}
+
+# for item in items:
+# 	print items[item]
 
 # ### Wall testing
 

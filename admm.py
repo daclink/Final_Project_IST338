@@ -6,10 +6,6 @@
 #import admm; reload(admm); from admm import *
 
 """TODO
-Add Rooms
-	** was using the wrong X and y...
-
-Add bombs to fix wall issue...
 Implement health
 Add enemies 
 Add items
@@ -71,16 +67,23 @@ class mm():
 
 		curses.start_color()
 
+		keypresses = { 
+						'bomb':'b'
+						,'quit':'q'
+						# ,'menu':'m'
+					}
+
 		self.items= { 	'health':{'icon':u"\U0001f493",'position':1,'max':100,'current':100},
 						'money':{'icon':u"\U0001f4b0",'position':4,'max':100000,'current':0},
 						'food':{'icon':u"\U0001f371",'position':7,'max':10,'current':0},
 						'bomb':{'icon':u"\U0001F4a3",'position':10,'max':10,'current':3}
 				 	}
-
+		# used for placing on screen bombs
+		sbomb = {}
+		rem_bomb = []
 
 		stdscr.clear()
 		stdscr.refresh()
-
 
 		self.minX = minX	= 0
 		#how far to the right we can go.
@@ -132,11 +135,8 @@ class mm():
 		# self.__generate_maze_stack__(self.startY,self.startX)
 		self.__generate_maze__(self.startY,self.startX)
 
-		
-
 		charPos = [self.lastY,self.lastX]
 
-		
 		self.__make_room__(self.startY,self.startX,3)
 		self.__make_room__(charPos[0],charPos[1],3)
 
@@ -177,10 +177,26 @@ class mm():
 
 			stdscr.refresh()
 			
+			for b in sbomb:
+				sbomb[b]['counter'] -= 1
+				if sbomb[b]['counter'] < 0:
+					rem_bomb +=[b]
+			if rem_bomb:
+				for b in rem_bomb:
+					self.__det_bomb(sbomb[b])
+					del sbomb[b]
+				rem_bomb = []
+			if sbomb:						
+				for b in sbomb:
+					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x'],self.items['bomb']['icon'].encode("utf-8"))
+					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x']+1,str(sbomb[b]['counter']))
 
 			move = stdscr.getch()
-			if move == 113 :
+			if move == ord('q') or move == ord('Q') :
 				moveTest = False
+			elif move == ord('b') or move == ord('B') :
+				self.__place_bomb__(charPos[0],charPos[1],sbomb)
+
 			elif move == curses.KEY_RIGHT:
 				if self.maze[charPos[0]][charPos[1]+1]['wall'] == False :
 					charPos[1] += 1
@@ -194,6 +210,8 @@ class mm():
 				if self.maze[charPos[0]+1][charPos[1]]['wall'] == False :
 					charPos[0] += 1
 			
+			
+
 
 		# end main while
 
@@ -325,8 +343,6 @@ class mm():
 			except KeyError as e:
 				self.__err__(e,{'x':x,'y':y,'ny':ny,'nx':nx,'report':"getting neighbors of x and y"},getframeinfo(currentframe()).lineno)
 
-
-
 			if self.__in_range__(ny,nx) and not self.maze[ny][nx]['visited']:
 				# self.visited -= 1
 
@@ -424,8 +440,31 @@ class mm():
 		# 		self.maze[neighbors[r]['y']][neighbors[r]['x']]['wall'] = False
 
 
+	def __place_bomb__(self,y,x, sbomb):
+		if self.items['bomb']['current'] > 0:
+			self.items['bomb']['current'] -= 1
+			sbomb[len(sbomb)+1] = {'counter':3,'y':y,'x':x}
+		
+
+	def __get_item__(self,y,x,item):
+		pass
+		# check item capacity
+		# add item up to capacity
+		# mark maze item as gone
+
+	def __det_bomb(self,bomb):
+		for col in range(bomb['y']-1,bomb['y']+2):
+			for row in range(bomb['x']-1,bomb['x']+2):
+				if self.__in_range__(col,row):
+					self.maze[col][row]['wall'] = False
+
+
 	def __in_range__(self,y,x):
-		return self.minY < y < self.maxY and self.minX < x < self.maxX
+		"""
+			check if the y and x values are in screen range
+			+/- 1 to account for the screen border.
+		"""
+		return self.minY+1 < y < self.maxY-1 and self.minX+1 < x < self.maxX-1
 
 	def __err__(self,e,values,line):
 		log =  open("admm.log",'a')
