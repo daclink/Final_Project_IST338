@@ -6,15 +6,22 @@
 #import admm; reload(admm); from admm import *
 
 """TODO
+Add ending condition
 Implement health
+Implement attack
+	* Fist U0000270A
+	* knife 1F52A
+	* hammer 1F528
+	* crossed swords 2694
+Implement Defense
+	* Shield thing U0001F530
 Add enemies 
 Add items
-	* change to name \n icon == number
 	* Implement Inventory
 
 ?Add pop-ups for leveling?
 	*https://docs.python.org/2/library/curses.html#textbox-objects
-Add ending condition
+
 
 Add Loading screen
 
@@ -76,7 +83,7 @@ class mm():
 		self.items= { 	'health':{'icon':u"\U0001f493",'position':1,'max':100,'current':100},
 						'money':{'icon':u"\U0001f4b0",'position':4,'max':100000,'current':0},
 						'food':{'icon':u"\U0001f371",'position':7,'max':10,'current':0},
-						'bomb':{'icon':u"\U0001F4a3",'position':10,'max':10,'current':3}
+						'bomb':{'icon':u"\U0001F4a3",'position':10,'max':10,'current':3,'timer':4}
 				 	}
 		# used for placing on screen bombs
 		sbomb = {}
@@ -93,7 +100,8 @@ class mm():
 		self.minY = minY	= 0
 		##how far down we can go
 		#leaving room for messages
-		self.maxY = maxY	= stdscr.getmaxyx()[0] -5
+		self.maxY = maxY	= stdscr.getmaxyx()[0] 
+
 
 		# Room stuff
 		self.maxRoomSize = 4
@@ -115,29 +123,27 @@ class mm():
 			
 			for rows in range(maxX):
 				maze[cols][rows] = {}
-				if cols%2 or rows%2:
-					maze[cols][rows]['wall'] = True
-					maze[cols][rows]['visited'] = False
-				else :
-					self.visited += 1
-					maze[cols][rows]['wall'] = True
-					maze[cols][rows]['visited'] = False
-					self.uv.append([cols,rows])
+				maze[cols][rows]['wall'] = True
+				maze[cols][rows]['visited'] = False
+				self.visited += 1
+				self.uv.append([cols,rows])
 				
 
-		self.lastY = 5
-		self.lastX = 25
-		self.startX = 70
-		self.startY = 100
+		# self.lastY = 5
+		# self.lastX = 25
+		# self.startX = 70
+		# self.startY = 100
+
 
 		self.maze = maze
 		self.__get_start__()
-		# self.__generate_maze_stack__(self.startY,self.startX)
 		self.__generate_maze__(self.startY,self.startX)
 
-		charPos = [self.lastY,self.lastX]
-
 		self.__make_room__(self.startY,self.startX,3)
+
+		self.__get_player_start__()
+
+		charPos = [self.lastY,self.lastX]
 		self.__make_room__(charPos[0],charPos[1],3)
 
 		stdscr.clear()
@@ -175,8 +181,6 @@ class mm():
 
 			stdscr.addstr(self.startY,self.startX,self.exit.encode("utf-8"))
 
-			stdscr.refresh()
-			
 			for b in sbomb:
 				sbomb[b]['counter'] -= 1
 				if sbomb[b]['counter'] < 0:
@@ -188,9 +192,11 @@ class mm():
 				rem_bomb = []
 			if sbomb:						
 				for b in sbomb:
-					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x'],self.items['bomb']['icon'].encode("utf-8"))
+					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x'],self.items['bomb']['icon'].encode("utf-8"), curses.A_BLINK)
 					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x']+1,str(sbomb[b]['counter']))
 
+
+			stdscr.refresh()
 			move = stdscr.getch()
 			if move == ord('q') or move == ord('Q') :
 				moveTest = False
@@ -211,7 +217,7 @@ class mm():
 					charPos[0] += 1
 			
 			
-
+			self.__space__(charPos[0],charPos[1])
 
 		# end main while
 
@@ -223,15 +229,43 @@ class mm():
 
 
 	def __get_start__(self):
-		self.startY = random.choice(self.maze.keys())
-		self.startX = random.choice(self.maze[self.startY].keys())
+		self.startX = random.choice(range((self.minX+5),(self.maxX-5)))
+		self.startY = random.choice(range((self.minY+5),(self.maxY-5)))
+
+		# self.startY = random.choice(self.maze.keys())
+		# self.startX = random.choice(self.maze[self.startY].keys())
 		# self.__make_room__(self.startY,self.startX,0)
 
+	def __get_player_start__(self,y=-1,x=-1):
+		
+		if y == -1 and x == -1:
+			y = abs(self.maxY - self.startY)
+			x = abs(self.maxX - self.startX)
+		
+		if self.maze[y][x]['wall']:
+			neighbors = self.__get_neighbor__(y,x)
+		else:
+			self.lastY = y
+			self.lastX = x
+			return
+
+		for n in neighbors:
+			y = neighbors[n]['y']
+			x = neighbors[n]['x']
+			if self.__in_range__(y,x)  and not self.maze[y][x]['wall']:
+				self.lastY = y
+				self.lastX = x
+				return
+		n = random.choice(neighbors.key())
+
+		__get_player_start__(neighbors[n]['y'],neighbors[n]['x'])
+
+		return 
+		
 
 
-	def __get_player_start__(self):
+	def __space__(self,y,x):
 		pass
-
 
 	def __repr__(self):
 		maze = ''
@@ -278,52 +312,6 @@ class mm():
 		# print neighbors
 		return neighbors
 
-	def __generate_maze_stack__(self,y,x):
-
-		self.maze[y][x]['visited'] = True
-
-		n = self.__get_neighbor__(y,x)
-
-		while self.uv:
-			if n:
-				cn = random.choice(n)
-				self.uv.append([y,x])
-				# remove wall between y,x and n[cn]['y']['x']
-				# active cell is north
-				if y > n[cn]['y']:
-					self.maze[y-1][x]['wall'] = False
-				# active cell is east
-				if x > n[cn]['x']:
-					self.maze[y][x-1]['wall'] = False
-				# active cell is west
-				if x < n[cn]['x']:
-					self.maze[y][x+1]['wall'] = False
-				# active cell is south
-				if y < n[cn]['y']:
-					self.maze[y+1][x]['wall'] = False
-				# self.__generate_maze_stack__(n[cn]['y'],n[cn]['x'])
-			elif self.uv:
-				rc = self.uv.pop(random.choice(range(len(self.uv))))
-				# self.__generate_maze_stack__(rc[0],rc[1])
-			
-		return 0
-
-		"""
-    	Make the initial cell the current cell and mark it as visited
-    	While there are unvisited cells
-        If the current cell has any neighbours which have not been visited
-            Choose randomly one of the unvisited neighbours
-            Push the current cell to the stack
-            Remove the wall between the current cell and the chosen cell
-            Make the chosen cell the current cell and mark it as visited
-        Else if stack is not empty
-            Pop a cell from the stack
-            Make it the current cell
-        Else
-            Pick a random unvisited cell, make it the current cell and mark it as visited
-           """
-
-
 	def __generate_maze__(self,y,x):
 
 		self.maze[y][x]['wall']= False
@@ -363,6 +351,8 @@ class mm():
 					self.maze[y][nx+1]['wall'] = False
 			del neighbors[rand_neighbor]
 
+			self.__generate_maze__(ny,nx)
+
 			if self.visited > 0:
 				self.__generate_maze__(ny,nx)
 
@@ -379,6 +369,7 @@ class mm():
 				rmx = self.roomX.pop()
 				self.__make_room__(rmy,rmx)
 				rm -=1
+
 
 			# add a border
 		for col in self.maze:
@@ -401,7 +392,7 @@ class mm():
 
 
 	def __make_room__(self,y,x,size=-1):
-		neighbors = self.__get_neighbor__(y,x)
+		# neighbors = self.__get_neighbor__(y,x)
 		# I wanted to use list comprehension...
 		# self.maxRoomSize+1 to account for the way range works
 		# self.log.write("what?!\n\n")
@@ -440,10 +431,10 @@ class mm():
 		# 		self.maze[neighbors[r]['y']][neighbors[r]['x']]['wall'] = False
 
 
-	def __place_bomb__(self,y,x, sbomb):
+	def __place_bomb__(self,y,x,sbomb):
 		if self.items['bomb']['current'] > 0:
 			self.items['bomb']['current'] -= 1
-			sbomb[len(sbomb)+1] = {'counter':3,'y':y,'x':x}
+			sbomb[len(sbomb)+1] = {'counter':self.items['bomb']['timer'],'y':y,'x':x}
 		
 
 	def __get_item__(self,y,x,item):
@@ -464,7 +455,7 @@ class mm():
 			check if the y and x values are in screen range
 			+/- 1 to account for the screen border.
 		"""
-		return self.minY+1 < y < self.maxY-1 and self.minX+1 < x < self.maxX-1
+		return self.minY < y < self.maxY-1 and self.minX < x < self.maxX-1
 
 	def __err__(self,e,values,line):
 		log =  open("admm.log",'a')

@@ -1,47 +1,64 @@
 #e.py
 # from __future__ import print_function
 # from time import localtime, strftime
-import json
+import sys
 import random
+import time
+import curses
+import locale
+import random
+import math
+import json
+from time import localtime, strftime
+from inspect import currentframe, getframeinfo
 
-sbomb = {}
+locale.setlocale(locale.LC_ALL, '')
+code = locale.getpreferredencoding()
 
-def __det_bomb(bomb):
-	for col in range(bomb['y']-1,bomb['y']+2):
-		for row in range(bomb['x']-1,bomb['x']+2):
-			print "col %d row %d BOOM\n" %(col,row)
+print u"\U0000270A"
+print u"\U0000270A"
+print u"\U0001F52A"
+print u"\U0001F528"
+print u"\U00002694"
+print u"\U0001F530"
+# print u"\U0001f355"
 
-for b in range(4):
-	sbomb[len(sbomb)+1] = {
-							'counter':3
-							,'y':random.choice(range(12))
-							,'x':random.choice(range(12))
-						}
-print sbomb
+# def __det_bomb(bomb):
+# 	for col in range(bomb['y']-1,bomb['y']+2):
+# 		for row in range(bomb['x']-1,bomb['x']+2):
+# 			print "col %d row %d BOOM\n" %(col,row)
+
+# for b in range(4):
+# 	sbomb[len(sbomb)+1] = {
+# 							'counter':3
+# 							,'y':random.choice(range(12))
+# 							,'x':random.choice(range(12))
+# 						}
+# print sbomb
 
 
-while sbomb[2]['counter'] > 0:
-	print sbomb[2]['counter']
-	sbomb[2]['counter'] -=1
+# while sbomb[2]['counter'] > 0:
+# 	print sbomb[2]['counter']
+# 	sbomb[2]['counter'] -=1
 
-__det_bomb(sbomb[2])
+# __det_bomb(sbomb[2])
 
-for b in sbomb:
-	print "sbomb[%d]['counter'] == %d " %(b,sbomb[b]['counter'])
+# for b in sbomb:
+# 	print "sbomb[%d]['counter'] == %d " %(b,sbomb[b]['counter'])
 
-remB = {}
-for b in sbomb:
-	if sbomb[b]['counter'] <= 0:
-		remB += [b]
+# remB = []
+# for b in sbomb:
+# 	if sbomb[b]['counter'] <= 0:
+# 		remB += [b]
 
-print "remB\n\n"		
-print remB
-print "remB\n\n"		
+# print "remB\n\n"		
+# print remB
+# print "remB\n\n"		
 
-for x in remB:
-	del sbomb[x]
+# for x in remB:
+# 	del sbomb[x]
 
-print sbomb
+# print sbomb
 
 # items= { 	'heart':{'icon':u"\U0001f493",'position':1},
 # 						'money':{'icon':u"\U0001f4b0",'position':2},
