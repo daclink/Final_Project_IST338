@@ -90,8 +90,10 @@ class mm():
 		p1 = player.Player()
 		p1.addItem('bombs',3)
 		self.__setScore__(self.score,p1)
+		#hot springs
+		self.exit =u"\U00002668"
 		#house
-		self.exit = u"\U0001f3e0"
+		# self.exit = u"\U0001f3e0"
 		#blue thing
 		# self.exit = u"\U0001f4a0"
 
@@ -769,22 +771,34 @@ class mm():
 		if p.inventory['bombs']['quantity'] > 0:
 			p.inventory['bombs']['quantity'] -= 1
 			sbomb[len(sbomb)+1] = {'counter':items.bombs()['timer'],'y':y,'x':x}
-		
-
-	def __get_item__(self,y,x,item):
-		pass
-		# check item capacity
-		# add item up to capacity
-		# mark maze item as gone
 
 	def __det_bomb(self,bomb,stdscr):
+		"""
+			Used to detonate bombs...
+
+			inputs:	array bomb: this has the tuple of coordinates
+					curses screen object stdscr: allows the animation to be drawn
+
+			Output:	none but it modifies self.maze
+		"""
 		for col in range(bomb['y']-1,bomb['y']+2):
 			for row in range(bomb['x']-2,bomb['x']+3):
-				stdscr.addstr(col,row,"*")
+				stdscr.addstr(col,row,u"\U00002601".encode("utf-8"))
 				if self.__in_range__(col,row):
 					self.maze[col][row]['wall'] = False
 
 	def __get_bomb__(self,y,x,p):
+		"""
+			allows players to pickup bombs.
+			If the player isn't over capacity then it adds the bomb
+			to their inventory count.
+
+			Inputs: int y the y coordinate to update
+					int x the x coordinate to update
+					player p: the player to add the bomb too
+
+			output:	none but it modifies the player and self.maze
+		"""
 		# p.inventory['bombs']['quantity'] += 3
 		if p.addItem('bombs',3):
 			self.maze[y][x]['contains']['bomb'] = False
@@ -799,11 +813,25 @@ class mm():
 
 
 	def __get_window__(self,size="small"):
+		"""
+			Used to generate a sub-window.
+			I will be using this when I finally get combat to work...
+			inputs:	string size generates the size widow based on overall max 
+					window size. Current options are: small(default), medium
+
+			output: returns a curses window object
+		"""
 		if size.lower() == 'small':
 			startY = int(self.maxY*.5)
 			startX = int(self.maxX*.5)
 			endY   = int(self.maxY*.1)
 			endX   = int(self.maxX*.1)
+			return curses.newwin(startY,startX,endY,endX)
+		elif size.lower() == 'medium':
+			startY = int(self.maxY*.5)
+			startX = int(self.maxX*.5)
+			endY   = int(self.maxY*.25)
+			endX   = int(self.maxX*.25)
 			return curses.newwin(startY,startX,endY,endX)
 		else :
 			startY = int(self.maxY*.5)
