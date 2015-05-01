@@ -1,6 +1,11 @@
+###
 # Drew A. Clinkenbeard
-#THis is my test file...
-#e.py
+# 14 - April - 2014
+# e.py
+# This is my scratch paper...
+#
+###
+
 # from __future__ import print_function
 # from time import localtime, strftime
 import sys
@@ -20,18 +25,16 @@ locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
 
 
-def boolin(cellVisited=False,retVisited=False):
-	neighbors = {}
-	# check north and northwest cells
-	if True and not cellVisited or retVisited:
-		print "cellVisited : {0} retVisited {1}".format(cellVisited, retVisited)
+# def boolin(cellVisited=False,retVisited=False):
+# 	neighbors = {}
+# 	# check north and northwest cells
+# 	if True and not cellVisited or retVisited:
+# 		print "cellVisited : {0} retVisited {1}".format(cellVisited, retVisited)
 
-boolin(True,True)
-boolin(True,False)
-boolin(False,True)
-boolin(False,False)
-
-
+# boolin(True,True)
+# boolin(True,False)
+# boolin(False,True)
+# boolin(False,False)
 
 
 

@@ -1,9 +1,16 @@
+###
+# Drew A. Clinkenbeard
+# player.py
+# used to create the player objects
+# 29 - April - 2014
+#
+###
 from items import *
 from math import floor, sqrt,ceil
 
 class Player():
 
-	def __init__(self, name="Samalander",score=0, race='human',xp=1, debug=False):
+	def __init__(self, name="Samalander",score=0, race='human',xp=10, debug=False):
 		"""
 			create a player character. Initializes health, xp, score,race, name, and debug
 
@@ -21,7 +28,7 @@ class Player():
 		self.level 		= 0
 		self.attack 	= 0
 		self.defense 	= 0
-		self.__setLevel(xp)
+		self.__setLevel()
 
 		self.__setMaxHP()
 		self.health = self.maxHealth
@@ -190,7 +197,7 @@ class Player():
 		"""
 		self.defense = self.defense + int(ceil(sqrt(self.xp))) + floor(self.maxHealth/2)
 
-	def setExp(self,xp):
+	def setXp(self,xp):
 		"""
 			used to set self.xp
 
@@ -198,7 +205,7 @@ class Player():
 
 			output: none but it modifies self.xp
 		"""
-		self.exp = exp
+		self.xp = xp
 
 	def addXP(self, xp):
 		"""

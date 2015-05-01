@@ -1,15 +1,25 @@
 ###
 # Drew A. Clinkenbeard
 # Error Reporter and Logger
-# 30 - April - 2014
-# Since I broke this appart into multiple classes
+# 29 - April - 2014
+# Since I broke this apart into multiple classes
 # I needed a more flexible logging system.
 ###
+
 from time import localtime, strftime
 
 class Logger():
 
 	def __init__(self, fileName="admm.log"):
+		"""
+			I like using tail -F to have a running log of errors and such.
+			rather than just printing to a file and checking it I thought I would create 
+			a system to make that possible
+
+			Inputs:	str fileName the name of the file being written
+
+			Output: creates a file named fileName
+		"""
 		self.fileName = fileName
 		try :
 			f = open(fileName,'a')
@@ -24,6 +34,33 @@ class Logger():
 
 
 	def _err(self,e=False,msg=False,line=False,fileName=False):
+		"""
+			Used to write errors. Errors and logs have a different look than logs
+			
+			inputs:	Exception e an exception. Only prints if it is present. 
+					Default: False
+
+					str msg: The message to print. Won't print if not present
+					Default: False
+
+					int line: the line on which the error occurred. Works 
+							 well with getframeinfo(currentframe()).lineno
+							 Default False
+
+					str fileName: the name of the file where the error occured
+							Default False
+
+			output: Writes to the specified log file.
+
+
+			Example Error Message:
+
+			[*** Error ***]
+			[30.Apr.2015 16:59:26] [Line : 212]
+			[Message: inventory is exit ]
+			[Error Supplied: string indices must be integers, not str]n
+			*********************************
+		"""
 		
 		f = open(self.fileName,'a')
 		
@@ -42,7 +79,37 @@ class Logger():
 		f.close()
 		
 
-	def _log(self,msg,line="none",level="Low",fileName=False):
+	def _log(self,msg,line=False,level="Low",fileName=False):
+
+		"""
+			Used to log actions.
+
+			inputs: str msg: the message to be logged. 
+					int line: the line where the log originated works 
+							well with getframeinfo(currentframe()).lineno
+							Default : False
+
+							str level: the log level. This could be used to determine
+									 which log statements are written. Not really
+									 implemented here.
+									 Default: 'low'
+
+							str fileName: the file where the log statement originated
+									Default: False
+
+			output: Writes to the specified log 
+
+
+			Example Log entry:
+
+			=-=-= Log Level: Low  =-=-=-=
+			[25.Apr.2015 15:32:51] 
+			 line : 	 355 
+			message: 	length of roomY 26, length of roomX 26)
+			=-=-=-=-=-=-=-=-=-=-=-=
+
+		"""
+
 		f = open(self.fileName,'a')
 		
 		report = "\n[Log {0}]\n".format(level)
@@ -57,6 +124,9 @@ class Logger():
 		f.write(report)
 
 	def closeFile(self):
+		"""
+			Used to close the log file if necessary. Shouldn't be needed...
+		"""
 		try :
 			self.f.close()
 			return true

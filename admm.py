@@ -1,13 +1,20 @@
-#Drew A. Clinkenbeard
+###
+# Drew A. Clinkenbeard
+# Advanced Maze Maker
+# and main game loop....
+# 14 - April - 2014
+#
+###
+#=-=-=-=-= sources -=-=-=-=-=-
 #http://www.unicode.org/Public/emoji/1.0/full-emoji-list.html
 #http://en.wikipedia.org/wiki/Maze_generation_algorithm
-#https://docs.python.org/2/library/curses.html#textbox-objects
+#https://docs.python.org/2/library/curses.html
+###
 
 #import admm; reload(admm); from admm import *;mm()
 
 """TODO
 Add Character object
-	Implement health
 	Implement attack
 		* Fist U0000270A
 		* knife 1F52A
@@ -19,17 +26,16 @@ Add enemies
 ?Add pop-ups for leveling?
 	*https://docs.python.org/2/library/curses.html#textbox-objects
 
-
-Add Loading screen
+=-=-=-=-=-= WAY Future features
 
 Add save/load feature
+Add multiplayer
 
 
 """
 
 import sys
 import random
-import time
 import curses
 import locale
 import random
@@ -212,8 +218,8 @@ class mm():
 							stdscr.addstr(cols,rows," ",curses.A_DIM)
 					for inv in self.maze[cols][rows]['contains']:
 						try:
-							if self.maze[cols][rows]['contains'][inv]:
-								stdscr.addstr(cols,rows,self.items[inv]['icon'].encode("utf-8"))
+							if inv in self.items and self.maze[cols][rows]['contains'][inv]:
+								stdscr.addstr(cols,rows,self.items[inv]['icon'].encode("utf-8"),curses.A_NORMAL)
 						except Exception as e:
 							# print  self.maze[cols][rows]['contains']
 							msg = "inventory is {0}".format(self.maze[cols][rows]['contains'])
@@ -263,7 +269,7 @@ class mm():
 
 
 			# Draw the exit
-			stdscr.addstr(self.startY,self.startX,self.exit.encode("utf-8"))
+			stdscr.addstr(self.startY,self.startX,self.exit.encode("utf-8"), curses.A_NORMAL)
 
 			# this should probably be its own functions
 			# Currently this is how to calculate bomb detonations..
@@ -275,7 +281,6 @@ class mm():
 			if rem_bomb:
 				for b in rem_bomb:
 					self.__det_bomb(sbomb[b],stdscr)
-							
 					del sbomb[b]
 				rem_bomb = []
 			if sbomb:						
