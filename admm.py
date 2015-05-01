@@ -272,7 +272,8 @@ class mm():
 					rem_bomb +=[b]
 			if rem_bomb:
 				for b in rem_bomb:
-					self.__det_bomb(sbomb[b])
+					self.__det_bomb(sbomb[b],stdscr)
+							
 					del sbomb[b]
 				rem_bomb = []
 			if sbomb:						
@@ -421,8 +422,6 @@ class mm():
 		else:
 			self.__get_player_start__(random.choice(range(y)),random.choice(range(x)))
 			return 
-
-
 		return 
 
 
@@ -769,7 +768,7 @@ class mm():
 		"""
 		if p.inventory['bombs']['quantity'] > 0:
 			p.inventory['bombs']['quantity'] -= 1
-			sbomb[len(sbomb)+1] = {'counter':self.items['bomb']['timer'],'y':y,'x':x}
+			sbomb[len(sbomb)+1] = {'counter':items.bombs()['timer'],'y':y,'x':x}
 		
 
 	def __get_item__(self,y,x,item):
@@ -778,19 +777,18 @@ class mm():
 		# add item up to capacity
 		# mark maze item as gone
 
-	def __det_bomb(self,bomb):
+	def __det_bomb(self,bomb,stdscr):
 		for col in range(bomb['y']-1,bomb['y']+2):
-			for row in range(bomb['x']-1,bomb['x']+2):
+			for row in range(bomb['x']-2,bomb['x']+3):
+				stdscr.addstr(col,row,"*")
 				if self.__in_range__(col,row):
 					self.maze[col][row]['wall'] = False
 
-
 	def __get_bomb__(self,y,x,p):
-
-		self.maze[y][x]['contains']['bomb'] = False
 		# p.inventory['bombs']['quantity'] += 3
-		p.addItem('bombs',3)
-		self.__addScore__(self.items['bomb']['score'],p)
+		if p.addItem('bombs',3):
+			self.maze[y][x]['contains']['bomb'] = False
+			self.__addScore__(self.items['bomb']['score'],p)
 
 	def __in_range__(self,y,x):
 		"""
