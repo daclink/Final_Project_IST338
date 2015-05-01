@@ -41,8 +41,6 @@ class items():
 		ret['food'] = items.food()
 
 		return ret
-
-
 	
 	@staticmethod
 	def bombs():

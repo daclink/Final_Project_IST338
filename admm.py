@@ -6,7 +6,6 @@
 #import admm; reload(admm); from admm import *;mm()
 
 """TODO
-Add ending condition
 Add Character object
 	Implement health
 	Implement attack
@@ -16,8 +15,6 @@ Add Character object
 		* crossed swords 2694
 	Implement Defense
 		* Shield thing U0001F530
-	Add items
-		* Implement Inventory
 Add enemies 
 ?Add pop-ups for leveling?
 	*https://docs.python.org/2/library/curses.html#textbox-objects
@@ -50,6 +47,18 @@ sys.setrecursionlimit(100000)
 class mm():
 
 	def __init__(self, score=0,debug=False):
+		"""
+			admm started out as JUST the maze maker (ADvanced Maze Maker)
+			but it sort of spiraled out of control. It is currently the 
+			main game loop as well. I am not sure if I will ever change that.
+			It takes a score and a debug value.
+			I noticed that debug was, possibly, leading to segfaults...
+
+			Inputs: int: 		score 
+					boolean:	debug
+			Output: Not really much
+
+		"""
 		self.debug = debug
 		self.log = logger.Logger("admm.log")
 
@@ -144,9 +153,8 @@ class mm():
 			self.log._log(json.dumps(self.roomY),getframeinfo(currentframe()).lineno,"low")
 			
 
-		self.uv = []
-
 		# setup maze
+		# 
 		for cols in range(maxY):
 			maze[cols] = {}
 			
@@ -157,13 +165,6 @@ class mm():
 				maze[cols][rows]['checked'] = False
 				maze[cols][rows]['contains'] = {}
 				self.visited += 1
-				self.uv.append([cols,rows])
-				
-
-		# self.lastY = 5
-		# self.lastX = 25
-		# self.startX = 70
-		# self.startY = 100
 
 
 		self.maze = maze
@@ -188,6 +189,10 @@ class mm():
 		stdscr.refresh()
 		# begin main while
 
+		# OH my goodness this is such a hack
+		# this started life as a way to test character movement...
+		# it is currently the main game loop... >_<
+
 		self.moveTest = True
 		# charPos = {'y':0,'x':0}
 		while self.moveTest:
@@ -196,7 +201,6 @@ class mm():
 
 			for cols in self.maze:
 				for rows in self.maze[cols]:
-					# if self.maze[cols][rows]['visited']:
 					if self.maze[cols][rows]['wall'] :
 						stdscr.addstr(cols,rows,"#",curses.A_DIM)
 					else:
@@ -212,21 +216,24 @@ class mm():
 							# print  self.maze[cols][rows]['contains']
 							msg = "inventory is {0}".format(self.maze[cols][rows]['contains'])
 							
-							self.log._err(e,msg,"212","medium")
-					# else :
-					# 	stdscr.addstr(cols,rows,".",curses.A_DIM)
+							self.log._err(e,msg,"219","medium")
+			
+			# Drawing the player character.
+			# eventually the charPos should PROBABLY be contained in the 
+			# player object... I will add it to the list.
 			stdscr.addstr(charPos[0],charPos[1]-1,p1.icon.encode("utf-8"))
+			
 			# display side items
 			stdscr.addstr(self.minY,self.maxX+2,"Score")
-			stdscr.addstr(self.minY+1,self.maxX +2,str(self.score))
+			stdscr.addstr(self.minY+1,self.maxX +2,str(p1.score))
 			for item in items.getItems():
 				posY = self.minY + items.getItems()[item]['position'] + 3
 				posX = self.maxX + 2  #guh magic number
-				# icon = self.items[item]['icon']
-				# values += " 
-				msg = "Trying to get the inventory to display properly...\n"
-				msg += " p1.inventory == {0}".format(p1.inventory) 
-				self.log._log(msg,226)
+
+				# Ditching this log statement because I think I fixed it...
+				# msg = "Trying to get the inventory to display properly...\n"
+				# msg += " p1.inventory == {0}".format(p1.inventory) 
+				# self.log._log(msg,226)
 				values = str(p1.inventory[item]['quantity'])
 				values += "/"
 				values += str(items.getItems()[item]['max'])
@@ -238,9 +245,27 @@ class mm():
 				stdscr.addstr(posY,posX,name.encode("utf-8"))
 				stdscr.addstr(posY+1,posX,values.encode("utf-8"))
 
+				# okay here we are getting the list of keypresses.
+				# one day I might add standard wasd keys for movement... 
+				# note the offset for maxY...
+				instOffset = len(keypresses)*2
+				stdscr.addstr(self.maxY-instOffset,self.maxX+1, "Controls:")
+				# self.log._log("offset = {0}".format(instOffset))
+				for k in keypresses:
+					instOffset -= 1
+					cy = self.maxY-instOffset
+					cx = self.maxX+2
+					ctrl = "{0} = {1}".format(keypresses[k],k)
+					# self.log._log(ctrl)
+					stdscr.addstr(cy,cx,ctrl.encode("utf-8"))
 
+
+			# Draw the exit
 			stdscr.addstr(self.startY,self.startX,self.exit.encode("utf-8"))
 
+			# this should probably be its own functions
+			# Currently this is how to calculate bomb detonations..
+			# it is REALLY hacky.
 			for b in sbomb:
 				sbomb[b]['counter'] -= 1
 				if sbomb[b]['counter'] < 0:
@@ -255,60 +280,109 @@ class mm():
 					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x'],self.items['bomb']['icon'].encode("utf-8"), curses.A_BLINK)
 					stdscr.addstr(sbomb[b]['y'],sbomb[b]['x']+1,str(sbomb[b]['counter']))
 
+			# okay we have drawn everything, time to make it show up.
 			stdscr.refresh()
+
+			# this is the movement loop.
+			# I suspect there is a prettier way to do this but...
+
 			move = stdscr.getch()
 			if move == ord('q') or move == ord('Q') :
 				self.moveTest = False
 			elif move == ord('b') or move == ord('B') :
 				self.__place_bomb__(charPos[0],charPos[1],sbomb,p1)
 
-			elif move == curses.KEY_RIGHT:
+			elif move == curses.KEY_RIGHT or move == ord('d'):
 				if self.maze[charPos[0]][charPos[1]+1]['wall'] == False :
 					charPos[1] += 1
-			elif move == curses.KEY_LEFT:
+			elif move == curses.KEY_LEFT or move == ord('a'):
 				if self.maze[charPos[0]][charPos[1]-1]['wall'] == False :
 					charPos[1] -= 1
-			elif move == curses.KEY_UP:
+			elif move == curses.KEY_UP or move == ord('w'):
 				if self.maze[charPos[0]-1][charPos[1]]['wall'] == False :
 					charPos[0] -= 1
-			elif move == curses.KEY_DOWN:
+			elif move == curses.KEY_DOWN or move == ord('s'):
 				if self.maze[charPos[0]+1][charPos[1]]['wall'] == False :
 					charPos[0] += 1
 			
-			self.__reveal__(charPos[0],charPos[1],p1.sight)
+			# This is currently disabled. 
+			# there was a time where I had sight radius implemented.
+			# that time may come again.
+			# self.__reveal__(charPos[0],charPos[1],p)
 			
+			# check to see if there is anything in our cell.
+			# I might make this check adjacent cells.. I might not.
 			self.__cell_check__(charPos[0],charPos[1],p1)
 
 			self.score = p1.score
 
 		# end main while
 
-
-		time.sleep(1)
+		# time.sleep(1)
+		
 		##put it all back
+		# The resetty() returns the terminal to standard 
 		curses.resetty()
+		# kill the window.
 		curses.endwin()
 
-	def __reveal__(self,y,x,sight):
+	def __reveal__(self,y,x,p):
+		"""
+		Used to reveal a section of the map.
+		Ideally this would be used to calculate how many squares to check
+		Basically this is 'fog' to prevent overworking the CPU
+		Also to add some mystery.
+		It is currently broken.
+		inputs: int y, the y coordinate
+				int x, the x coordinate
+				Player p, a player object
+		output: modifies the visible cells. It is currently phenomenally broken.
+		"""
 
-		for cols in range(y-sight,y+sight):
-			for rows in range(x-sight,x-sight):
+		for cols in range(y-p.sight,y+p.sight):
+			for rows in range(x-p.sight,x-p.sight):
 				if self.__in_range__(cols,rows) and self.maze[cols][rows]['visited']:
 					self.maze[cols][rows]['visited'] = True
-					self.__addScore__(1,p1)
+					self.__addScore__(1,p)
 
 	def __get_start__(self):
+		"""
+			generates the starting position of the maze.
+			Ironically this is where the exit goes... >_< 
+			A re-factor may be needed
+			Since this is maze specific I felt it belonged in this object
+			inputs:	none
+			outputs: modifies the self.startY and self.startX values
+		"""
 		self.startX = random.choice(range((self.minX+5),(self.maxX-5)))
 		self.startY = random.choice(range((self.minY+5),(self.maxY-5)))
 
 	def __get_player_start__(self,y=-1,x=-1):
+		"""
+			finds the starting position of the player.
+			This was tedious. I wanted it to be far enough away from the exit
+			but I also wanted it to be random.
+			I still get errors when it has trouble calculating the neighbors...
+			I think that is a problem with my neighbor calculator.
+			Totally. I forgot neighbors checks for visited cells..
+
+			Inputs:	int y, the starting location
+					int x, the other starting coordinate
+
+			outputs: None but it modifies lastY and lastX. 
+					 Ironically these are the STARTING positions...
+		"""
 		
+		# if no values are supplied find the opposite of the maze exit... I think
 		if y == -1 and x == -1:
 			y = abs(self.maxY - self.startY)
 			x = abs(self.maxX - self.startX)
 		
+		# Prepare to meet the neighbors.
 		neighbors = {}
 
+		# I am trying to make sure I don't spawn the player in a wall.
+		# this is the fundamental problem with teleportation as a superpower.
 		if self.maze[y][x]['wall'] or not self.__in_range__(y,x):
 			neighbors = self.__get_neighbor__(y,x)
 		else:
@@ -316,6 +390,8 @@ class mm():
 			self.lastX = x
 			return
 		try :
+			# OMG this is so janky. It fails so often... 
+			# It fails because the current version of neighbors only returns non-visited cells...
 			if not neighbors:
 				self.__get_player_start__(random.choice(range(y)),random.choice(range(x)))
 				return 
@@ -346,27 +422,70 @@ class mm():
 
 
 	def __cell_check__(self,y,x,p):
+		"""
+			This is used to check the contents of a cell in the maze.
+			For the most part it works pretty well.
+			I do want to move the items out of the main maze structure
+			Essentially I need another structure with a tuple of rows/columns
+			and the items held therein... We'll see how it goes
 
+			Inputs:	int y: the y coordinate cell to check
+					int x: the x coordinate cell to check
+					player p: the player who encountered the cell.
+
+			Output:	None but it modifies the player.
+
+		"""
+		# see if the player has visited the cell
+		# this is used to add score and, eventually, 
+		# change the cells that can be viewed
+		# I tried using the visited value that was already present
+		# but, for whatever reason, it didn't work...
 		if not self.maze[y][x]['checked']:
 			self.maze[y][x]['checked'] = True
 			self.__addScore__(1,p)
+
+		# Check the cell for contents.
 		if self.maze[y][x]['contains']:
 			for item in self.maze[y][x]['contains']:
+				
+				# is it an item...
+				# this probably needs to change to take advantage of the
+				# items class... or maybe not...
+				# 
 				if item in self.items:
 					if self.maze[y][x]['contains'][item]:
 						self.items[item]['action'](y,x,p)
 
+				# same as above but for enemies instead of
+				# items
 				if item in self.enemies:
 					self.enemies[item]['encounter'](y,x)
-		if y == self.startY and x == self.startX:
-			self.__found_exit__()
+
+		# Find exit? good!
+		self.__found_exit__(y,x)
 
 				
 
-	def __found_exit__(self):
-		self.moveTest = False
+	def __found_exit__(self,y,x):
+		"""
+			This is also kind of janky.
+			Mostly I feel like the whole moveTest thing
+			needs to change.
+
+			Inputs:	int y the y coordinate to check for an exit
+					int x the x coordinate to check for an exit
+
+			Output:	None... But it modifies self.moveTest
+			
+		"""
+		if y == self.startY and x == self.startX:
+			self.moveTest = False
 
 	def __repr__(self):
+		"""
+			Shows the final maze layout and the score.
+		"""
 		maze = ''
 		checked = 0
 		total = 0
@@ -402,6 +521,17 @@ class mm():
 
 
 	def __get_neighbor__(self,y,x,diagonals=False):
+		"""
+			This seems to work relatively well.
+			Though on occasion it spits out an empty set.
+			It returns all the neighbors of a cell. 
+			
+			inputs:	int y the y coordinate at the center to check
+					int x the x coordinate at the center to check
+					bool diagonals: When true returns diagonal cells
+									otherwise it returns n,e,w,s
+									default False
+		"""
 		neighbors = {}
 		# check north and northwest cells
 		if (y-2) >= self.minY and not self.maze[y-2][x]['visited']:
@@ -430,7 +560,16 @@ class mm():
 		# print neighbors
 		return neighbors
 
-	def __generate_maze__(self,y,x,load=False):
+	def __generate_maze__(self,y,x):
+		"""
+			Alrighty. The meat and potatoes.
+			Uses a modified recursive backtrace path finding algorithm
+			Also generates random rooms... more details in the function
+
+			inputs:	int y the y coordinate of the cell to check
+					int x the x coordinate of the cell to check
+					curses object load: used to display the loading screen.
+		"""
 
 		load = self.__get_window__()
 		load.box()
@@ -484,6 +623,7 @@ class mm():
 					self.maze[y][nx+1]['visited'] = True
 					self.maze[y][nx+1]['wall'] = False
 					self.visited += 1
+
 			del neighbors[rand_neighbor]
 
 			self.__generate_maze__(ny,nx)
@@ -518,19 +658,47 @@ class mm():
 		return 0
 
 	def __hider__(self):
+		"""
+			This isn't being used...
+			It was designed to convert all the cells from visited to not...
+		"""
 		for col in range(self.maxY):
 			for row in range(self.maxX):
 				if self.__in_range__(col,row):
 					self.maze[col][row]['visited'] = False
 
 	def __setScore__(self, score,p):
+		"""
+			set the players score. If I ever make this multiplayer...
+			This will help add the score to the correct player.
+
+			inputs: int score the score to set
+					player p the player whose score will be set
+
+			output:	None but it modifies score
+		"""
 		p.score = score
 
 	def __addScore__(self,score,p):
+		"""
+			Adds to the players score. If I ever make this multiplayer...
+			This will help add a score to the correct player.
+
+			inputs: int score the score to set
+					player p the player whose score will be set
+
+			output:	None but it modifies score
+		"""
 		p.score = p.score + score
 
 	def __place_items__(self):
-
+		"""
+			Randomly assigns items to cell
+			Currently only assigns bombs... 
+			I'll need to modify it to add cash	
+			and food. 
+			Eventually I am going to swap it out to use a different icon...
+		"""
 		
 		for x in range(random.choice(range(3,6))):
 			
@@ -544,20 +712,28 @@ class mm():
 
 
 	def __make_room__(self,y,x,size=-1):
-		# neighbors = self.__get_neighbor__(y,x)
-		# I wanted to use list comprehension...
-		# self.maxRoomSize+1 to account for the way range works
-		# self.log.write("what?!\n\n")
-		# json.dump(neighbors,self.log)
-		msg = "calling make_room with y=%d,x=%d,size=%d" %(y,x,size)
-		if self.debug:
-			self.log._log(msg,"489")
+		"""
+			Used to generate random rooms to make the maze more interesting.
+			Uses neighbors...
+
+			inputs:	int y the y coordinate of the origin of the room to generate
+					int x the x coordinate of the origin of the room to generate
+					int size the diameter of the room. Default -1
+
+			output: none but it modifies self.maze
+		"""
 		
+		if self.debug:
+			msg = "calling make_room with y=%d,x=%d,size=%d" %(y,x,size)
+			self.log._log(msg,"728")
+		
+		# if no size is specified randomly pick on based on self.maxRoomSize
 		if size < 1:
 			size = random.choice(range(1,self.maxRoomSize))
 		if self.debug:
 			msg = "making a room with\n Y: %d - %d \n \nx: %d - %d" %(y-size, y+size+1,x-size,x+size+1)
 			self.log._log(msg,"551")
+		
 		for cols in range(y-size,y+size):
 			for rows in range(x-size,x+size):
 				try:
@@ -569,10 +745,21 @@ class mm():
 				except KeyError as e:
 					values = {"cols":cols,"rows":rows}
 					if debug:
-						self.log._err(e,values,"563")
+						self.log._err(e,values,"748")
 
 
 	def __place_bomb__(self,y,x,sbomb,p):
+		"""
+			Used to allow a player to add a bomb to the map.
+
+			Inputs:	int y the y coordinate where the bomb goes
+					int x the x coordinate where the bomb goes
+					array sbomb: the array of bombs which have been placed
+					player p: the player who placed the bomb.
+
+			output: none but it modifies sbomb
+
+		"""
 		if p.inventory['bombs']['quantity'] > 0:
 			p.inventory['bombs']['quantity'] -= 1
 			sbomb[len(sbomb)+1] = {'counter':self.items['bomb']['timer'],'y':y,'x':x}
@@ -592,8 +779,10 @@ class mm():
 
 
 	def __get_bomb__(self,y,x,p):
+
 		self.maze[y][x]['contains']['bomb'] = False
-		p.inventory['bombs']['quantity'] += 3
+		# p.inventory['bombs']['quantity'] += 3
+		p.addItem('bombs',3)
 		self.__addScore__(self.items['bomb']['score'],p)
 
 	def __in_range__(self,y,x):
