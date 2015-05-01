@@ -5,6 +5,8 @@ import sys
 import random
 import time
 import curses
+import curses.textpad
+import curses.panel
 import locale
 import random
 import math
@@ -15,13 +17,90 @@ from inspect import currentframe, getframeinfo
 locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
 
-print u"\U0000270A"
-print u"\U0000270A"
-print u"\U0001F52A"
-print u"\U0001F528"
-print u"\U00002694"
-print u"\U0001F530"
-# print u"\U0001f355"
+def tester(x):
+	print "great scott! ", x
+
+
+foo = {1:"cake!","fun!":"tester()","def":tester}
+
+print foo['fun!']
+
+
+foo['def']
+
+# import curses 
+
+# screen = curses.initscr()
+
+# try:
+#     screen.border(0)
+
+#     box1 = curses.newwin(20, 20, 5, 5)
+#     box1.box()    
+
+#     screen.refresh()
+#     box1.refresh()
+
+#     screen.getch()
+
+# finally:
+#     curses.endwin()
+
+# stdscr = curses.initscr()
+# curses.noecho()
+# curses.cbreak()
+# stdscr.keypad(1)
+
+# win = curses.newwin(5,60,5,10)
+# win.box()
+# stdscr.clear()
+# stdscr.refresh()
+
+# time.sleep(1)
+# pan = curses.panel.new_panel(win)
+# tb = curses.textpad.Textbox(win)
+# text = tb.edit()
+# curses.beep()
+# win.addstr(4,1,text.encode('utf-8'))
+
+# # Setup Screen
+# stdscr = curses.initscr()
+# curses.savetty() #make sure we can put the screen back the way we found it
+# curses.noecho() #prevent keypresses appearing on screen
+# curses.cbreak() #interpret input with out return
+# stdscr.keypad(1) #everyone loves the keypad
+# stdscr.clearok(1) #allow the screen to be cleared
+# # curses.curs_set(0) #hide the caret
+
+# curses.start_color()
+
+# stdscr.clear()
+# stdscr.refresh()
+
+# minX	= 0
+# #how far to the right we can go.
+# #Leaving room for messages.
+# maxX = stdscr.getmaxyx()[1] -15
+
+# minY	= 0
+# ##how far down we can go
+# #leaving room for messages
+# maxY	= stdscr.getmaxyx()[0] 
+
+
+# time.sleep(1)
+# ##put it all back
+# curses.resetty()
+# curses.endwin()
+
+
+# print u"\U0000270A"
+# print u"\U0000270A"
+# print u"\U0001F52A"
+# print u"\U0001F528"
+# print u"\U00002694"
+# print u"\U0001F530"
+# # print u"\U0001f355"
 
 # def __det_bomb(bomb):
 # 	for col in range(bomb['y']-1,bomb['y']+2):
