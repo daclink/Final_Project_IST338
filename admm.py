@@ -380,11 +380,16 @@ class mm():
 		
 		# Prepare to meet the neighbors.
 		neighbors = {}
+		# self__get_neighbor takes coordinates and a flag which determines if 
+		# visited neighbors should return. The default is to only return non-visited
+		# neighbors
+		returnVisited = True
 
 		# I am trying to make sure I don't spawn the player in a wall.
 		# this is the fundamental problem with teleportation as a superpower.
 		if self.maze[y][x]['wall'] or not self.__in_range__(y,x):
-			neighbors = self.__get_neighbor__(y,x)
+			
+			neighbors = self.__get_neighbor__(y,x,returnVisited)
 		else:
 			self.lastY = y
 			self.lastX = x
@@ -520,7 +525,7 @@ class mm():
 		return maze
 
 
-	def __get_neighbor__(self,y,x,diagonals=False):
+	def __get_neighbor__(self,y,x,vis=False,diagonals=False):
 		"""
 			This seems to work relatively well.
 			Though on occasion it spits out an empty set.
@@ -528,31 +533,33 @@ class mm():
 			
 			inputs:	int y the y coordinate at the center to check
 					int x the x coordinate at the center to check
+					bool vis: return visited cells
+							  default False
 					bool diagonals: When true returns diagonal cells
 									otherwise it returns n,e,w,s
 									default False
 		"""
 		neighbors = {}
 		# check north and northwest cells
-		if (y-2) >= self.minY and not self.maze[y-2][x]['visited']:
+		if (y-2) >= self.minY and not self.maze[y-2][x]['visited'] or vis:
 			neighbors['N'] = {'y':y-2,'x':x} 
 			if diagonals and x-2 >= self.minX:
 				neighbors['NW'] = {'y':y-2,'x':x-2}
 
 		# check east and south east
-		if (x+2) <= self.maxX-1 and not self.maze[y][x+2]['visited']:
+		if (x+2) <= self.maxX-1 and not self.maze[y][x+2]['visited'] or vis:
 			neighbors['E'] = {'y':y,'x':x+2}
 			if diagonals and (y+2) <= self.maxY:
 				neighbors['SE'] = {'y':y+2,'x':x+2} 
 
 		# check the north and nw corners
-		if (x-2) >= self.minX and not self.maze[y][x-2]['visited']:
+		if (x-2) >= self.minX and not self.maze[y][x-2]['visited'] or vis:
 			neighbors['W'] = {'y':y,'x':x-2}
 			if diagonals and (y-2) >= self.minY:
 				neighbors['NW'] = {'y':y-2,'x':x-2}
 
 		# check south cell and south west cell
-		if (y+2) <= self.maxY-1 and not self.maze[y+2][x]['visited']:
+		if (y+2) <= self.maxY-1 and not self.maze[y+2][x]['visited'] or vis:
 			neighbors['S'] = {'y':y+2,'x':x}
 			# check southwest cell
 			if diagonals and x+2 <= self.maxX:

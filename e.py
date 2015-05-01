@@ -1,3 +1,5 @@
+# Drew A. Clinkenbeard
+#THis is my test file...
 #e.py
 # from __future__ import print_function
 # from time import localtime, strftime
@@ -17,16 +19,32 @@ from inspect import currentframe, getframeinfo
 locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
 
-def tester(x):
-	print "great scott! ", x
+
+def boolin(cellVisited=False,retVisited=False):
+	neighbors = {}
+	# check north and northwest cells
+	if True and not cellVisited or retVisited:
+		print "cellVisited : {0} retVisited {1}".format(cellVisited, retVisited)
+
+boolin(True,True)
+boolin(True,False)
+boolin(False,True)
+boolin(False,False)
 
 
-foo = {1:"cake!","fun!":"tester()","def":tester}
-
-print foo['fun!']
 
 
-foo['def']
+
+# def tester(x):
+# 	print "great scott! ", x
+
+
+# foo = {1:"cake!","fun!":"tester()","def":tester}
+
+# print foo['fun!']
+
+
+# foo['def']
 
 # import curses 
 
