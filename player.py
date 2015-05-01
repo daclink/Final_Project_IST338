@@ -53,17 +53,20 @@ class Player():
 		return self.score
 
 	def addItem(self,item,itemNum):
-		
-		if item not in inventory:
-			inventory[item] = {
-				'quantity':itemNum
-			}
-			return True
-		elif inventory[item]['quantity'] >=  inventory[item]['max']:
+
+		# if item not in items.getItems():
+		# 	return False
+
+		if item not in self.inventory:
+			# self.inventory[item] = {
+			# 	'quantity':itemNum
+			# }
 			return False
-		elif (inventory[item]['quantity'] + itemNum) >= items[item]['max']:
+		elif self.inventory[item]['quantity'] >=  self.inventory[item]['max']:
+			return False
+		elif (self.inventory[item]['quantity']) + itemNum >= self.inventory[item]['max']:
 			self.inventory[item]['quantity'] = self.inventory[item]['max']
-			self.addScore(inventory[item]['score'])
+			self.addScore(self.inventory[item]['score'])
 			return True
 		else:
 			self.inventory[item]['quantity'] += itemNum

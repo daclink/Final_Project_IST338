@@ -3,7 +3,7 @@
 #http://en.wikipedia.org/wiki/Maze_generation_algorithm
 #https://docs.python.org/2/library/curses.html#textbox-objects
 
-#import admm; reload(admm); from admm import *
+#import admm; reload(admm); from admm import *;mm()
 
 """TODO
 Add ending condition
@@ -49,7 +49,7 @@ sys.setrecursionlimit(100000)
 
 class mm():
 
-	def __init__(self, debug=False):
+	def __init__(self, score=0,debug=False):
 		self.debug = debug
 		self.log = logger.Logger("admm.log")
 
@@ -66,7 +66,7 @@ class mm():
 		if debug :
 			print "Hello there! deubg is ", debug
 		# Setup Player
-		self.__setScore__(0)
+		
 		# pizza
 		# player =	u"\U0001f355"
 
@@ -77,7 +77,10 @@ class mm():
 		# 		'sight': 3
 		# 	}
 
+		self.score = score
 		p1 = player.Player()
+		p1.addItem('bombs',3)
+		self.__setScore__(self.score,p1)
 		#house
 		self.exit = u"\U0001f3e0"
 		#blue thing
@@ -220,7 +223,10 @@ class mm():
 				posY = self.minY + items.getItems()[item]['position'] + 3
 				posX = self.maxX + 2  #guh magic number
 				# icon = self.items[item]['icon']
-				# values += " " 
+				# values += " 
+				msg = "Trying to get the inventory to display properly...\n"
+				msg += " p1.inventory == {0}".format(p1.inventory) 
+				self.log._log(msg,226)
 				values = str(p1.inventory[item]['quantity'])
 				values += "/"
 				values += str(items.getItems()[item]['max'])
@@ -254,7 +260,7 @@ class mm():
 			if move == ord('q') or move == ord('Q') :
 				self.moveTest = False
 			elif move == ord('b') or move == ord('B') :
-				self.__place_bomb__(charPos[0],charPos[1],sbomb)
+				self.__place_bomb__(charPos[0],charPos[1],sbomb,p1)
 
 			elif move == curses.KEY_RIGHT:
 				if self.maze[charPos[0]][charPos[1]+1]['wall'] == False :
@@ -271,7 +277,9 @@ class mm():
 			
 			self.__reveal__(charPos[0],charPos[1],p1.sight)
 			
-			self.__cell_check__(charPos[0],charPos[1])
+			self.__cell_check__(charPos[0],charPos[1],p1)
+
+			self.score = p1.score
 
 		# end main while
 
@@ -287,7 +295,7 @@ class mm():
 			for rows in range(x-sight,x-sight):
 				if self.__in_range__(cols,rows) and self.maze[cols][rows]['visited']:
 					self.maze[cols][rows]['visited'] = True
-					self.__addScore__(1)
+					self.__addScore__(1,p1)
 
 	def __get_start__(self):
 		self.startX = random.choice(range((self.minX+5),(self.maxX-5)))
@@ -337,16 +345,16 @@ class mm():
 		return 
 
 
-	def __cell_check__(self,y,x):
+	def __cell_check__(self,y,x,p):
 
 		if not self.maze[y][x]['checked']:
 			self.maze[y][x]['checked'] = True
-			self.__addScore__(1)
+			self.__addScore__(1,p)
 		if self.maze[y][x]['contains']:
 			for item in self.maze[y][x]['contains']:
 				if item in self.items:
 					if self.maze[y][x]['contains'][item]:
-						self.items[item]['action'](y,x)
+						self.items[item]['action'](y,x,p)
 
 				if item in self.enemies:
 					self.enemies[item]['encounter'](y,x)
@@ -515,11 +523,11 @@ class mm():
 				if self.__in_range__(col,row):
 					self.maze[col][row]['visited'] = False
 
-	def __setScore__(self, score):
-		self.score = score
+	def __setScore__(self, score,p):
+		p.score = score
 
-	def __addScore__(self,score):
-		self.score = self.score + score
+	def __addScore__(self,score,p):
+		p.score = p.score + score
 
 	def __place_items__(self):
 
@@ -564,9 +572,9 @@ class mm():
 						self.log._err(e,values,"563")
 
 
-	def __place_bomb__(self,y,x,sbomb):
-		if self.items['bomb']['current'] > 0:
-			self.items['bomb']['current'] -= 1
+	def __place_bomb__(self,y,x,sbomb,p):
+		if p.inventory['bombs']['quantity'] > 0:
+			p.inventory['bombs']['quantity'] -= 1
 			sbomb[len(sbomb)+1] = {'counter':self.items['bomb']['timer'],'y':y,'x':x}
 		
 
@@ -583,10 +591,10 @@ class mm():
 					self.maze[col][row]['wall'] = False
 
 
-	def __get_bomb__(self,y,x):
+	def __get_bomb__(self,y,x,p):
 		self.maze[y][x]['contains']['bomb'] = False
-		self.items['bomb']['current'] += 3
-		self.__addScore__(self.items['bomb']['score'])
+		p.inventory['bombs']['quantity'] += 3
+		self.__addScore__(self.items['bomb']['score'],p)
 
 	def __in_range__(self,y,x):
 		"""
