@@ -68,7 +68,7 @@ class mm():
 		self.debug = debug
 		self.log = logger.Logger("admm.log")
 
-		self.log._log("testing...")
+		
 		maze = {}
 		# self.maxY = y-1
 		# self.maxX = x-1
@@ -96,12 +96,23 @@ class mm():
 		p1 = player.Player()
 		p1.addItem('bombs',3)
 		self.__setScore__(self.score,p1)
+		
+		# exit icon
+		#red circle?
+		# self.exit =u"\U00002B55"
 		#hot springs
-		self.exit =u"\U00002668"
+		# self.exit =u"\U00002668"
 		#house
 		# self.exit = u"\U0001f3e0"
 		#blue thing
-		# self.exit = u"\U0001f4a0"
+		self.exit = u"\U0001f4a0"
+		# arrow?
+		# self.exit = u"\U000023eb"
+
+		#wall Icon
+		self.wall = "#"
+
+		# self.wall = u"\U00002B1C"
 
 		# Setup Screen
 		stdscr = curses.initscr()
@@ -210,7 +221,7 @@ class mm():
 			for cols in self.maze:
 				for rows in self.maze[cols]:
 					if self.maze[cols][rows]['wall'] :
-						stdscr.addstr(cols,rows,"#",curses.A_DIM)
+						stdscr.addstr(cols,rows,self.wall.encode("utf-8"),curses.A_DIM)
 					else:
 						if self.maze[cols][rows]['checked']:
 							stdscr.addstr(cols,rows,".",curses.A_DIM)
@@ -504,7 +515,7 @@ class mm():
 			for rows in self.maze[cols]:
 				if self.maze[cols][rows]['wall'] :
 					# print '.',
-					maze += '#'
+					maze += self.wall
 				else:
 					if self.maze[cols][rows]['checked']:
 						# print ' ',

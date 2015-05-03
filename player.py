@@ -6,18 +6,18 @@
 #
 ###
 from items import *
-from math import floor, sqrt,ceil
+from math import floor, sqrt, ceil
 
 class Player():
 
-	def __init__(self, name="Samalander",score=0, race='human',xp=10, debug=False):
+	def __init__(self, name="Samalander",score=0, char_class='human',xp=10, debug=False):
 		"""
-			create a player character. Initializes health, xp, score,race, name, and debug
+			create a player character. Initializes health, xp, score,char_class, name, and debug
 
 			inputs:	str name: the player name. Default Samalander (it's from a book)
 					int score: the player score. Defualt 0
-					str race:	The player race. This will be used for stuff later default: human
-					int xp:	the players experience points. Currently not used. Default:1
+					str char_class:	The player character class. This will be used for stuff later default: human
+					int xp:	the players experience points. Currently not used. Default: 0
 					bool debug: Used for logging messages and such. Default False
 
 			output: Returns a player character 
@@ -90,7 +90,7 @@ class Player():
 	def __setMaxHP(self):
 		"""
 			determines player health based on level.
-			When different races, and more stats, are added
+			When different character classes, and more stats, are added
 			this will change
 
 			Inputs:	none

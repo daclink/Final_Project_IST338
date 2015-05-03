@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 
 import locale
 import codecs
+from math import floor
 
 class items():
 
@@ -104,4 +105,12 @@ class items():
 			output: prints an icon
 		"""
 		print item['icon'].encode('utf-8') 
+
+	@staticmethod
+	def dropNumber(item):
+		"""
+			The quantity of the item dropped.
+			This will be used for enemies and chests
+		"""
+		return int(range(1,item['max']*.3))
 
