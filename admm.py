@@ -22,7 +22,8 @@ Add Character object
 		* crossed swords 2694
 	Implement Defense
 		* Shield thing U0001F530
-Add enemies 
+Add Combat Loop
+
 ?Add pop-ups for leveling?
 	*https://docs.python.org/2/library/curses.html#textbox-objects
 
@@ -596,7 +597,6 @@ class mm():
 		"""
 
 		load = self.__get_window__()
-		load.box()
 		load.clear()
 		li = ['\\','-','/','|']
 		message = "Generating Maze"

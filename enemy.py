@@ -12,9 +12,7 @@ from math import ceil
 import items
 
 class Enemy():
-
-
-			
+		
 
 	def __init__(self, etype=-1, level=1):
 		"""
@@ -39,41 +37,43 @@ class Enemy():
 		self.enemy_list[etype]()
 
 	def __repr__(self):
+		"""
+			I know I could just make this one big format
+			String but I don't want too.
+		"""
 
-		ret = self.etype + "\n"
-		ret += "level: {0}\n".format(self.level)
-		ret += "HP:    {0}\n".format(self.hp)
-		ret += "att:   {0}\n".format(self.attack)
-		ret += "def:   {0}\n".format(self.defense)
-		ret += "drops: {0}\n".format(self.drop)
-		ret += "=-=-=-=-=-=-=-=-=\n"
-		ret += "XP earned {0}\n".format(self.xp)
+		ret  = u"{0} {1}\n".format(self.etype, self.icon)
+		ret += u"level:\t{0}\n".format(self.level)
+		ret += u"HP:\t{0}\n".format(self.hp)
+		ret += u"att:\t{0}\n".format(self.attack)
+		ret += u"def:\t{0}\n".format(self.defense)
+		# ret += u"XP:\t{0}\n".format(self.xp)
+		ret += u"drops:\t{0}\n".format(self.drop)
+		ret += u"=-=-=-=-=-=-=-=-=\n"
+		ret += u"XP earned {0}\n".format(self.xp)
 
-		return ret
+		return ret.encode("utf-8")
 
 	def kobold(self):
-		self.etype = "kobold"
-		self.level = int(ceil(self.level*.5))
-		self.xp = self.level*2
-		self.attack = self.level*random.choice(range(1,6))
-		self.defense = self.level*random.choice(range(1,6))
-		self.hp = self.level*random.choice(range(1,10))
-		
-		self.drop = random.choice(items.items.getItems().keys())
+		self.etype 		= u"kobold"
+		self.level 		= int(ceil(self.level*.5))
+		self.xp 		= self.level*2 + random.choice(range(1,7))
+		self.attack 	= self.level*random.choice(range(1,6))
+		self.defense 	= self.level*random.choice(range(1,6))
+		self.hp 		= self.level*random.choice(range(1,10))		
+		self.drop 		= random.choice(items.items.getItems().keys())
+		self.icon 		= u"\U0001f409"
 
 
 	def rat(self):
-		self.etype = "rat"
-		self.level = int(ceil(self.level*.5))
-		self.xp = self.level*2
-		self.attack = self.level*random.choice(range(1,6))
-		self.defense = self.level*random.choice(range(1,6))
-		self.hp = self.level*random.choice(range(1,10))
-		self.drop = random.choice(items.items.getItems().keys())
+		self.etype 		= u"rat"
+		self.level 		= int(ceil(self.level*.5))
+		self.xp 		= self.level*2 + random.choice(range(1,5))
+		self.attack 	= self.level*random.choice(range(1,6))
+		self.defense	= self.level*random.choice(range(1,6))
+		self.hp 		= self.level*random.choice(range(1,10))
+		self.drop 		= random.choice(items.items.getItems().keys())
+		self.icon 		= u"\U0001f400"
 
-
-k = Enemy(-1,15)
-
-print k
 
 
