@@ -334,7 +334,7 @@ class mm():
 					charPos[0] += 1
 			elif move == ord('c'):
 				window = self.__get_window__('medium')
-				combat.Combat(p1,enemy.Enemy(),window)
+				combat.Combat(p1,enemy.Enemy(-1,p1.level),window)
 			
 			# This is currently disabled. 
 			# there was a time where I had sight radius implemented.

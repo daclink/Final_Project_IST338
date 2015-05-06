@@ -11,6 +11,7 @@ import curses
 import random
 
 import logger
+import items
 
 class Combat():
 
@@ -45,11 +46,11 @@ class Combat():
 		keypresses = { 
 						  
 						# , 'quit':'q'
-						  'a':'attack'
-						, 'd':'defend'
-						, 'i':'items'
+						  'a':['attack',self._attack]
+						, 'd':['defend',self._defend]
+						, 'i':['items', self._items]
 						# , 'b':'bomb'
-						, 'r':'run'
+						, 'r':['run', self._run]
 					}
 
 
@@ -75,7 +76,7 @@ class Combat():
 			# show keys
 			y = self.pSide[0]+4	
 			for k in sorted(keypresses):
-				ctrl = "{0} = {1}".format(k,keypresses[k])				
+				ctrl = "{0} = {1}".format(k,keypresses[k][0])				
 				window.addstr(y,self.pSide[1],ctrl.encode('utf-8'))
 				y +=1
 			
@@ -103,11 +104,19 @@ class Combat():
 			msg = "Key pressed = {0}".format(key)
 			# l._log(msg)
 			if key in keypresses:
-				self._parser(key,p1,e1,window)
+				# self._parser(key,p1,e1,window)
+
+				damage = keypresses[key][1](p1,e1,window)
+
 			else:
 				battle = False
 
-			window.clear()
+			if damage > e1.hp:
+				combat = self._victory(p1,e1,window)
+			
+
+
+		window.clear()
 
 			# time.sleep(3)
 
@@ -124,27 +133,19 @@ class Combat():
 		# window.addstr(y,x,attack.encode("utf-8"))
 		# window.refresh()
 		
-	def __enemy(self, window):
+	def __enemy(self, p1,e1, window):
 		pass
 
 	def _parser(self,key,p1,e1,window):
 		"""
 			used to parse the key the player input.
+			This shouldn't be needed...
 		"""
 		if key == 'a':
-			damage = self._attack(p1,e1)
-			try:
-				e1.damage(damage)
-			except Exception as e:
-				self.l._err(e,damage )
-			msg = "{0} hit {1} for {2}".format(p1.name,e1.etype,damage)
-			window.addstr(1,1,msg)
-			window.refresh()
-			time.sleep(1)
-			
+			self._attack(p1,e1,window)
 
 		elif key == 'd':
-			damage = self._defend(p1,e1)
+			self._defend(p1,e1)
 			
 		elif key == 'i':
 			self._items(p1)
@@ -152,7 +153,7 @@ class Combat():
 			self._run(p1)
 
 	
-	def _attack(self,attacker,defender):
+	def _attack(self,attacker,defender,window):
 		"""
 			Calculate the hit
 			For now this is a pretty simple calculation.
@@ -164,15 +165,24 @@ class Combat():
 		"""
 		self.critical = False
 		roll = self.dX()
+		msg = ""
 
 		if roll >=19:
+			msg = "CRITICAL HIT! "
 			damage = attacker.attack*2
 		elif roll >=2:
 			damage = attacker.attack - (random.choice(range(0,defender.defense+1)))
 		else:
 			damage = 0 
 
-	
+		try:
+			defender.damage(damage)
+		except Exception as e:
+			self.l._err(e,damage )
+		msg += "{0} hit {1} for {2}".format(attacker.name,defender.etype,damage)
+		window.addstr(1,1,msg)
+		window.refresh()
+		time.sleep(1.5)
 
 		return damage
 
@@ -184,6 +194,44 @@ class Combat():
 
 	def _run(self,p1,e1):
 		pass
+
+	def _victory(self,p1,e1,window):
+
+		window.clear()
+		msg = "{0} defeated the {1}\n".format(p1.name,e1.etype)
+		
+		
+		drop = e1.drop
+		itemScore = items.items().getItems()[drop]['score']
+		itemQuant = self.dX(3)
+		score = (int(e1.xp/2)) + e1.level + (itemQuant*itemScore)
+		ding = p1.addXP(e1.xp)
+		
+		p1.addItem(drop,itemQuant)
+		p1.score += score
+		
+		msg += " You got {0} {1}\n".format(itemQuant,drop)
+		msg += " You earned {0} xp\n".format(e1.xp)
+		msg += " You earned {0} score\n".format(score)
+		if ding:
+			msg += " *** You leveled up! ***\n"
+		msg += " Level : {0}\n".format(p1.level)
+		msg += " Press any key to continue"
+
+		window.border(0)
+		window.addstr(1,1,msg, curses.A_NORMAL)
+
+		window.refresh()
+
+		window.getch()
+
+		return False
+
+		
+
+
+
+
 
 	@staticmethod
 	def dX(sides=20):

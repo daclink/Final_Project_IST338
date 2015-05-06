@@ -227,6 +227,8 @@ class Player():
 		self.xp += xp
 		if (floor(sqrt(self.xp)) > self.level):
 			self.levelUp()
+			return True
+		return False
 			
 	def levelUp(self):
 		"""
