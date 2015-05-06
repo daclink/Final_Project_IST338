@@ -23,7 +23,7 @@ class Player():
 			output: Returns a player character 
 
 		"""
-		
+		self.char_class = char_class
 		self.xp 		= 0
 		self.level 		= 0
 		self.attack 	= 0

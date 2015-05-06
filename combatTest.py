@@ -1,10 +1,14 @@
 # combatTest.py
 import curses
 import time
+import locale
 
 import enemy
 import player
 import combat
+
+locale.setlocale(locale.LC_ALL, '')
+code = locale.getpreferredencoding()
 
 stdscr = curses.initscr()
 curses.savetty() #make sure we can put the screen back the way we found it
@@ -42,11 +46,11 @@ e1 = enemy.Enemy()
 
 stdscr.clear()
 
-stdscr.addstr(2,2,"WHAT!")
+stdscr.addstr(2,2,"Fight!")
 
 stdscr.refresh()
 
-time.sleep(1)
+# time.sleep(3)
 
 combat.Combat(p1,e1,window)
 

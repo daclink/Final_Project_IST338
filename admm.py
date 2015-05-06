@@ -48,6 +48,8 @@ from inspect import currentframe, getframeinfo
 from items import *
 import logger
 import player
+import enemy
+import combat
 
 sys.setrecursionlimit(100000)
 
@@ -128,8 +130,12 @@ class mm():
 		curses.start_color()
 
 		keypresses = { 
-						'bomb':'b'
-						,'quit':'q'
+						'bomb'  : 'b'
+						,'quit' : 'q'
+						,'North': 'w'
+						,'East' : 'd'
+						,'West' : 'a'
+						,'South': 's'
 						# ,'menu':'m'
 					}
 
@@ -268,7 +274,7 @@ class mm():
 				# okay here we are getting the list of keypresses.
 				# one day I might add standard wasd keys for movement... 
 				# note the offset for maxY...
-				instOffset = len(keypresses)*2
+				instOffset = len(keypresses)+1
 				stdscr.addstr(self.maxY-instOffset,self.maxX+1, "Controls:")
 				# self.log._log("offset = {0}".format(instOffset))
 				for k in keypresses:
@@ -324,6 +330,9 @@ class mm():
 			elif move == curses.KEY_DOWN or move == ord('s'):
 				if self.maze[charPos[0]+1][charPos[1]]['wall'] == False :
 					charPos[0] += 1
+			elif move == ord('c'):
+				window = self.__get_window__('medium')
+				combat.Combat(p1,enemy.Enemy(),window)
 			
 			# This is currently disabled. 
 			# there was a time where I had sight radius implemented.
