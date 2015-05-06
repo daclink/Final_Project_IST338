@@ -52,7 +52,16 @@ stdscr.refresh()
 
 # time.sleep(3)
 
-combat.Combat(p1,e1,window)
+# combat.Combat(p1,e1,window)
+
+win2 = curses.newwin(1,1,4,4)
+
+try:
+	win2.addstr(1,1,"!")
+except Exception as e:
+	print e
+
+time.sleep(2)
 
 curses.resetty()
 curses.endwin()

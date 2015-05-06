@@ -24,7 +24,7 @@ class Player():
 
 		"""
 		self.char_class = char_class
-		self.xp 		= 0
+		self.xp 		= xp
 		self.level 		= 0
 		self.attack 	= 0
 		self.defense 	= 0
@@ -54,9 +54,14 @@ class Player():
 		self.__setDefense()
 
 	def __repr__(self):
-		out  = "Final Health : {0}\n".format(self.health)
-		out += "Final Score  : {0}\n".format(self.score)
-		out += "Ending Level : {0}\n".format(self.level)
+		# out  = "Final Health : {0}\n".format(self.health)
+		# out += "Final Score  : {0}\n".format(self.score)
+		# out += "Ending Level : {0}\n".format(self.level)
+		out  = "Health {0}/{1}\n".format(self.health,self.maxHealth)
+		out += "Level    {0}\n".format(self.level)
+		out += "XP       {0}".format(self.xp)
+
+		return out.encode('utf-8')
 
 
 	def setName(self,name):
@@ -98,6 +103,7 @@ class Player():
 			Outputs: none but it modifies self.maxHealth
 		"""
 		self.maxHealth = int(ceil((self.level*10)))
+		self.__setHealth(self.maxHealth)
 
 	def __setHealth(self,health):
 		"""
@@ -117,7 +123,10 @@ class Player():
 
 			output: none but it modifies self.health
 		"""
-		self.health += health
+		if (self.health + health) > self.maxHealth:
+			self.health = self.maxHealth
+		else:
+			self.health += health
 
 	def getInventory(self):
 		"""
@@ -263,4 +272,19 @@ class Player():
 			return True
 
 
+	def damage(self,value):
+		"""
+			adding this to be compatible with combat...
+			in the fullness of time this will be moved to a different
+			class
+		"""
 
+		self.__addHealth(-1*value)
+
+	def heal(self,value):
+		"""
+			adding this to be compatible with combat...
+			in the fullness of time this will be moved to a different
+			class
+		"""
+		self.__addHealth(value)

@@ -36,6 +36,8 @@ class Enemy():
 
 		self.enemy_list[etype]()
 
+		self.maxHP = self.hp
+
 	def __repr__(self):
 		"""
 			I know I could just make this one big format
@@ -44,7 +46,7 @@ class Enemy():
 
 		ret  = u"{0} {1}\n".format(self.etype, self.icon)
 		ret += u"level:\t{0}\n".format(self.level)
-		ret += u"HP:\t{0}\n".format(self.hp)
+		ret += u"HP:\t{0}/{1}\n".format(self.hp,self.maxHP)
 		ret += u"att:\t{0}\n".format(self.attack)
 		ret += u"def:\t{0}\n".format(self.defense)
 		# ret += u"XP:\t{0}\n".format(self.xp)
@@ -74,6 +76,30 @@ class Enemy():
 		self.hp 		= self.level*random.choice(range(1,10))
 		self.drop 		= random.choice(items.items.getItems().keys())
 		self.icon 		= u"\U0001f400"
+
+	def damage(self,value):
+		"""
+		apply damage...
+
+		inputs: int value the amount of damage to apply
+
+		output: none but modifies self.hp
+		"""
+		self.hp -= value
+
+	def heal(self,value):
+		"""
+		undo damage...
+
+		inputs: int value the amount of damage to undo
+
+		output: none but modifies self.hp
+		"""
+
+		if (self.hp + value) > self.maxHP:
+			self.hp = self.maxHP
+		else:
+			self.hp += value
 
 
 

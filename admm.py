@@ -99,6 +99,8 @@ class mm():
 		p1 = player.Player()
 		p1.addItem('bombs',3)
 		self.__setScore__(self.score,p1)
+
+		self.log._log(p1)
 		
 		# exit icon
 		#red circle?
@@ -808,9 +810,9 @@ class mm():
 		"""
 		for col in range(bomb['y']-1,bomb['y']+2):
 			for row in range(bomb['x']-2,bomb['x']+3):
-				stdscr.addstr(col,row,u"\U00002601".encode("utf-8"))
 				if self.__in_range__(col,row):
 					self.maze[col][row]['wall'] = False
+					stdscr.addstr(col,row,u"\U00002601".encode("utf-8"))
 
 	def __get_bomb__(self,y,x,p):
 		"""
